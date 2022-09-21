@@ -6,5 +6,6 @@ public interface AuthService {
 
     int signUp(SignUpReqDto dto);
 
+    int checkId(String id);
 
 }
