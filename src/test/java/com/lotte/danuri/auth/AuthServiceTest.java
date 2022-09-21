@@ -2,6 +2,7 @@ package com.lotte.danuri.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.lotte.danuri.auth.common.exceptions.exception.DuplicatedIdException;
 import com.lotte.danuri.auth.dto.SignUpReqDto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,4 +33,15 @@ public class AuthServiceTest {
 
         assertThat(result).isEqualTo(1);
     }
+
+    @Test
+    void 아이디_중복() {
+
+        String id = "aaa";
+
+        Assertions.assertThatThrownBy(() -> authService.checkId(id))
+            .isInstanceOf(DuplicatedIdException.class)
+            .hasMessageContaining("Duplicated id");
+    }
+
 }
