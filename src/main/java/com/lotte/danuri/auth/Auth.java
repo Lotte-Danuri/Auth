@@ -13,13 +13,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Member extends BaseEntity {
+public class Auth extends BaseEntity {
 
     private String loginId;
 
     private String password;
 
     private int role;
+
+    private Long memberId;
+
+    private String name;
 
     private LocalDateTime deletedDate;
 
