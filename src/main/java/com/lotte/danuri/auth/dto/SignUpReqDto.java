@@ -1,6 +1,6 @@
 package com.lotte.danuri.auth.dto;
 
-import com.lotte.danuri.auth.Member;
+import com.lotte.danuri.auth.Auth;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -35,11 +35,13 @@ public class SignUpReqDto {
     @NotNull
     private String address;
 
-    public Member toEntity() {
-        return Member.builder()
+    public Auth toEntity(Long memberId) {
+        return Auth.builder()
             .loginId(id)
             .password(password)
             .role(role)
+            .name(name)
+            .memberId(memberId)
             .build();
     }
 }
