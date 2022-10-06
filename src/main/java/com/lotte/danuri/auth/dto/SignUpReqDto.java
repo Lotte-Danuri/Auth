@@ -35,10 +35,10 @@ public class SignUpReqDto {
     @NotNull
     private String address;
 
-    public Auth toEntity(Long memberId) {
+    public Auth toEntity(Long memberId, String encryptedPwd) {
         return Auth.builder()
             .loginId(id)
-            .password(password)
+            .encryptedPwd(encryptedPwd)
             .role(role)
             .name(name)
             .memberId(memberId)
