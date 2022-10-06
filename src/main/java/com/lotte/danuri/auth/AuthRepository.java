@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface AuthRepository extends JpaRepository<Auth, Long> {
 
     Optional<Auth> findByLoginIdAndDeletedDateIsNull(String id);
+
+    Optional<Auth> findByMemberIdAndDeletedDateIsNull(Long memberId);
 }
