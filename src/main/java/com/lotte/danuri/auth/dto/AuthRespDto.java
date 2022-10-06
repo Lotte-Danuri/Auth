@@ -11,7 +11,7 @@ public class AuthRespDto {
 
     private String id;
 
-    private String password;
+    private String encryptedPwd;
 
     private Long memberId;
 
