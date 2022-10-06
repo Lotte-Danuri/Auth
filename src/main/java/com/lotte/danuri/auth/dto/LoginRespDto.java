@@ -1,4 +1,4 @@
-package com.lotte.danuri.auth.jwt.dto;
+package com.lotte.danuri.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

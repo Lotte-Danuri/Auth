@@ -1,4 +1,4 @@
-package com.lotte.danuri.auth.common.exceptions;
+package com.lotte.danuri.auth.common.exceptions.code;
 
 import com.lotte.danuri.auth.common.exceptions.code.ErrorCode;
 import lombok.Getter;
