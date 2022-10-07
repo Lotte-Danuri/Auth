@@ -4,17 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter
 @Builder
+@Getter
 @AllArgsConstructor
-public class AuthRespDto {
-
-    private String id;
-
-    private String encryptedPwd;
+public class TokenDto {
 
     private Long memberId;
-
-    private String name;
+    private String accessToken;
+    private String refreshToken;
 
 }
