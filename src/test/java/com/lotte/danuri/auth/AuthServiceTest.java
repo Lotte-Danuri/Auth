@@ -3,7 +3,7 @@ package com.lotte.danuri.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.lotte.danuri.auth.common.exceptions.exception.DuplicatedIdException;
-import com.lotte.danuri.auth.dto.SignUpReqDto;
+import com.lotte.danuri.auth.dto.SignUpDto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class AuthServiceTest {
 
     @Test
     void 회원가입() {
-        SignUpReqDto dto = SignUpReqDto.builder()
+        SignUpDto dto = SignUpDto.builder()
             .id("aaa")
             .password("aaaa")
             .name("안채영")
