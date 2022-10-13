@@ -8,10 +8,11 @@ import com.lotte.danuri.auth.common.exceptions.exception.DuplicatedIdException;
 import com.lotte.danuri.auth.common.exceptions.exception.InvalidRefreshTokenException;
 import com.lotte.danuri.auth.common.exceptions.exception.WrongLoginInfoException;
 import com.lotte.danuri.auth.dto.AuthRespDto;
-import com.lotte.danuri.auth.dto.SignUpReqDto;
+import com.lotte.danuri.auth.dto.SignUpDto;
 import com.lotte.danuri.auth.security.TokenProvider;
 import com.lotte.danuri.auth.dto.LoginReqDto;
 import com.lotte.danuri.auth.dto.TokenDto;
+import feign.FeignException.FeignClientException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -19,6 +20,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Date;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.User;
@@ -29,7 +31,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 @Transactional
 public class AuthServiceImpl implements AuthService {
@@ -42,19 +43,28 @@ public class AuthServiceImpl implements AuthService {
     private final TokenProvider tokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @Builder
+    public AuthServiceImpl(AuthRepository authRepository, MemberClient memberClient,
+        Environment env,
+        TokenProvider tokenProvider, BCryptPasswordEncoder passwordEncoder) {
+        this.authRepository = authRepository;
+        this.memberClient = memberClient;
+        this.env = env;
+        this.tokenProvider = tokenProvider;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
-    public int signUp(SignUpReqDto dto) {
+    public int signUp(SignUpDto dto) {
 
         // Member 서버에 회원 개인정보 API로 전송 필요
-        //Long memberId = memberClient.getInfo(dto);
-        Long memberId = 7L;
+        Long memberId = memberClient.getInfo(dto);
 
         String encryptedPwd = passwordEncoder.encode(dto.getPassword());
         Auth auth = dto.toEntity(memberId, encryptedPwd);
 
         // 아이디, 패스워드, 역할, 회원ID, 이름만 auth의 테이블에 저장
         Auth saved = authRepository.save(auth);
-        log.info(saved.getLoginId());
 
         return 1;
     }

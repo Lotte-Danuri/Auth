@@ -1,7 +1,6 @@
 package com.lotte.danuri.auth.dto;
 
 import com.lotte.danuri.auth.Auth;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -11,7 +10,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class SignUpReqDto {
+public class SignUpDto {
 
     @NotNull
     @Size(min = 5, max = 12)
