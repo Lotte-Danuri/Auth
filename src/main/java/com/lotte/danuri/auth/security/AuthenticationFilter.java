@@ -80,7 +80,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         response.addHeader("access_token", accessToken);
         response.addHeader("refresh_token", refreshToken);
-        //response.addHeader("userId", String.valueOf(userDetails.getMemberId())); // 추후에 삭제
     }
 
 }
