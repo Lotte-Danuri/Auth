@@ -267,4 +267,7 @@ gradle-app.setting
 
 **/application.properties
 
+### encrypt
+*.jks
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,gradle,java,intellij
