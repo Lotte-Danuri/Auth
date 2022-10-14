@@ -267,6 +267,8 @@ gradle-app.setting
 
 **/application.properties
 
+*.yml
+
 ### encrypt
 *.jks
 
