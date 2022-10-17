@@ -32,9 +32,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
             .antMatchers("/error/**").permitAll()
             .antMatchers("/actuator/**").permitAll()
-            .antMatchers("/**")
+            .antMatchers("/**").permitAll()
             //.access("hasIpAddress('" + "192.168.0.6" + "')")
-            .hasIpAddress("127.0.0.1")
+            //.hasIpAddress("127.0.0.1")
             .and()
             .addFilter(getAuthenticationFilter());
 
