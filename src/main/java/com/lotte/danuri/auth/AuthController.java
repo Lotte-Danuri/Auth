@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 @AllArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://sbbro.xyz"}, allowCredentials = "true")
+@CrossOrigin("*")
 public class AuthController {
 
     private final AuthService authService;
