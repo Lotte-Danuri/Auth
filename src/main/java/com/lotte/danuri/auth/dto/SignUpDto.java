@@ -26,6 +26,9 @@ public class SignUpDto {
     @NotNull
     private String gender;
 
+    @NotNull
+    private String birthDate;
+
     private int role;
 
     @NotNull
