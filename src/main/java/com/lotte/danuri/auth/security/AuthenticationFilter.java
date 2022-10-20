@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.Base64Utils;
 
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -70,6 +71,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String userName = ((User)authResult.getPrincipal()).getUsername();
         log.info("username = {}", userName);
         AuthRespDto userDetails = authService.getUserDetailsById(userName);
+        String encodedName = Base64Utils.encodeToString(userDetails.getName().getBytes());
+
+        log.info("encodedName : {}", encodedName);
+        log.info("decodedName : {}", new String(Base64Utils.decode(encodedName.getBytes())));
 
         // token 생성
         String accessToken = tokenProvider.createAccessToken(userDetails.getMemberId());
@@ -80,6 +85,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         response.addHeader("access_token", accessToken);
         response.addHeader("refresh_token", refreshToken);
+        response.addHeader("name", encodedName);
     }
 
 }
