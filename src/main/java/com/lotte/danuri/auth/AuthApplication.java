@@ -29,7 +29,8 @@ public class AuthApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-					.allowedOrigins("https://sbbro.xyz");
+					//.allowedOrigins("*")
+					.allowedMethods("GET", "POST", "OPTIONS");
 			}
 		};
 	}
