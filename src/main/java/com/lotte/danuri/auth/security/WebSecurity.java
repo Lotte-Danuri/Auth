@@ -6,6 +6,7 @@ import com.lotte.danuri.auth.common.exceptions.filter.ExceptionHandlerFilter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableWebSecurity
 @AllArgsConstructor
 @Slf4j
+@Order(0)
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private final Environment env;
@@ -27,18 +29,20 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         log.info("Call WebSecurity configure");
+
+        http.cors().disable();
         http.csrf().disable();
 
-        http.authorizeRequests()
-            .antMatchers("/error/**").permitAll()
-            .antMatchers("/actuator/**").permitAll()
-            .antMatchers("/**").permitAll()
-            //.access("hasIpAddress('" + "192.168.0.6" + "')")
-            //.hasIpAddress("127.0.0.1")
+        http
+            .antMatcher("/users")
+            .antMatcher("/login")
+            .authorizeRequests()
+            .anyRequest().authenticated()
             .and()
             .addFilter(getAuthenticationFilter());
 
         http.addFilterBefore(getExceptionHandlerFilter(), AuthenticationFilter.class);
+
     }
 
     private AuthenticationFilter getAuthenticationFilter() throws Exception {
