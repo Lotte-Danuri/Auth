@@ -9,17 +9,16 @@ import com.lotte.danuri.auth.common.exceptions.exception.InvalidRefreshTokenExce
 import com.lotte.danuri.auth.common.exceptions.exception.WrongLoginInfoException;
 import com.lotte.danuri.auth.dto.AuthRespDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
+import com.lotte.danuri.auth.oauth.SignUpByOAuthDto;
 import com.lotte.danuri.auth.security.TokenProvider;
 import com.lotte.danuri.auth.dto.LoginReqDto;
 import com.lotte.danuri.auth.dto.TokenDto;
-import feign.FeignException.FeignClientException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Date;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -75,18 +74,6 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicatedIdException(AuthErrorCode.DUPLICATED_LOGIN_ID.getMessage(), AuthErrorCode.DUPLICATED_LOGIN_ID);
         }
         return 1;
-    }
-
-    @Override
-    public AuthRespDto getAuth(LoginReqDto dto) {
-        Auth auth = authRepository.findByLoginIdAndDeletedDateIsNull(dto.getId()).orElseThrow();
-
-        return AuthRespDto.builder()
-            .id(auth.getLoginId())
-            .encryptedPwd(auth.getEncryptedPwd())
-            .memberId(auth.getMemberId())
-            .name(auth.getName())
-            .build();
     }
 
     @Override
@@ -165,4 +152,5 @@ public class AuthServiceImpl implements AuthService {
             true, true, true, true,
             new ArrayList<>());
     }
+
 }
