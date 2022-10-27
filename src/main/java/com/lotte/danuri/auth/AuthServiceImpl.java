@@ -9,9 +9,7 @@ import com.lotte.danuri.auth.common.exceptions.exception.InvalidRefreshTokenExce
 import com.lotte.danuri.auth.common.exceptions.exception.WrongLoginInfoException;
 import com.lotte.danuri.auth.dto.AuthRespDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
-import com.lotte.danuri.auth.oauth.SignUpByOAuthDto;
 import com.lotte.danuri.auth.security.TokenProvider;
-import com.lotte.danuri.auth.dto.LoginReqDto;
 import com.lotte.danuri.auth.dto.TokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -21,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,22 +42,28 @@ public class AuthServiceImpl implements AuthService {
     private final TokenProvider tokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    private final CircuitBreakerFactory circuitBreakerFactory;
+
     @Builder
     public AuthServiceImpl(AuthRepository authRepository, MemberClient memberClient,
         Environment env,
-        TokenProvider tokenProvider, BCryptPasswordEncoder passwordEncoder) {
+        TokenProvider tokenProvider, BCryptPasswordEncoder passwordEncoder,
+        CircuitBreakerFactory circuitBreakerFactory) {
         this.authRepository = authRepository;
         this.memberClient = memberClient;
         this.env = env;
         this.tokenProvider = tokenProvider;
         this.passwordEncoder = passwordEncoder;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override
     public int signUp(SignUpDto dto) {
 
-        // Member 서버에 회원 개인정보 API로 전송 필요
-        Long memberId = memberClient.getInfo(dto);
+        log.info("Before Call [getInfo] Method IN [Member-Service]");
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitBreaker");
+        Long memberId = circuitBreaker.run(() -> memberClient.getInfo(dto), throwable -> 0L);
+        log.info("After Call [getNames] Method IN [Member-Service]");
 
         String encryptedPwd = passwordEncoder.encode(dto.getPassword());
         Auth auth = dto.toEntity(memberId, encryptedPwd);
