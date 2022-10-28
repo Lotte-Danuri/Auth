@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,15 +36,17 @@ public class KakaoServiceImpl implements KakaoService{
     private final MemberClient memberClient;
     private final TokenProvider tokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     public KakaoServiceImpl(Environment env, AuthRepository authRepository,
         MemberClient memberClient, TokenProvider tokenProvider,
-        BCryptPasswordEncoder passwordEncoder) {
+        BCryptPasswordEncoder passwordEncoder, CircuitBreakerFactory circuitBreakerFactory) {
         this.env = env;
         this.authRepository = authRepository;
         this.memberClient = memberClient;
         this.tokenProvider = tokenProvider;
         this.passwordEncoder = passwordEncoder;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override
@@ -159,7 +163,10 @@ public class KakaoServiceImpl implements KakaoService{
         Long memberId = 0L;
         if(auth.isEmpty()) {
             // 최초 로그인, 회원가입 진행
-            memberId = memberClient.getInfoByOAuth(dto);
+            log.info("Before Call [getInfoByOAuth] Method IN [Member-Service]");
+            CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitBreaker");
+            memberId = circuitBreaker.run(() -> memberClient.getInfoByOAuth(dto), throwable -> 0L);
+            log.info("Before Call [getInfoByOAuth] Method IN [Member-Service]");
 
             String password = dto.getKakaoId() + ADMIN_KEY;
             String encryptedPwd = passwordEncoder.encode(password);
