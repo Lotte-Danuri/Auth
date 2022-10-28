@@ -19,6 +19,7 @@ public class OAuthSecurityConfig extends WebSecurityConfigurerAdapter {
         log.info("Call OAuthSecurityConfig configure");
 
         http.httpBasic().disable()
+            .cors().disable()
             .csrf().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
