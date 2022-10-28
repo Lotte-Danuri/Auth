@@ -1,4 +1,4 @@
-package com.lotte.danuri.auth.oauth;
+package com.lotte.danuri.auth.oauth.common;
 
 import com.lotte.danuri.auth.Auth;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SignUpByOAuthDto {
 
-    private Long kakaoId;
+    private String id;
     private String email;
     private String name;
     private int role;
@@ -18,6 +18,10 @@ public class SignUpByOAuthDto {
     private String gender;
 
     private String birthday;
+
+    private String birthyear;
+
+    private String phone;
 
     public Auth toEntity(Long memberId, String password) {
         return Auth.builder()

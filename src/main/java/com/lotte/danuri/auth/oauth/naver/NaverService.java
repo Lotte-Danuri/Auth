@@ -1,7 +1,9 @@
-package com.lotte.danuri.auth.oauth.kakao;
+package com.lotte.danuri.auth.oauth.naver;
 
 import com.lotte.danuri.auth.oauth.common.OAuthDetailService;
 import com.lotte.danuri.auth.oauth.common.SignUpByOAuthDto;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,11 +16,11 @@ import org.springframework.util.MultiValueMap;
 @Service
 @Transactional
 @Slf4j
-public class KakaoService implements OAuthDetailService {
+public class NaverService implements OAuthDetailService {
 
-    private final KakaoAttribute attribute;
+    private final NaverAttribute attribute;
 
-    public KakaoService(KakaoAttribute attribute) {
+    public NaverService(NaverAttribute attribute) {
         this.attribute = attribute;
     }
 
@@ -29,9 +31,9 @@ public class KakaoService implements OAuthDetailService {
 
         params.add("grant_type", "authorization_code");
         params.add("client_id", attribute.getClientId());
-        params.add("redirect_uri", attribute.getRedirectURI());
-        params.add("code", code);
         params.add("client_secret", attribute.getClientSecret());
+        params.add("code", code);
+        params.add("state", new BigInteger(130, new SecureRandom()).toString());
 
         return params;
     }
@@ -40,25 +42,23 @@ public class KakaoService implements OAuthDetailService {
     public SignUpByOAuthDto getUserInfo(String body) {
 
         JSONParser parser = new JSONParser();
-        JSONObject object;
-        JSONObject nameObj;
         JSONObject obj;
 
         try {
-            object = (JSONObject) parser.parse(body);
-            nameObj = (JSONObject) parser.parse(object.get("properties").toString());
-            obj = (JSONObject) parser.parse(object.get("kakao_account").toString());
+            JSONObject object = (JSONObject) parser.parse(body);
+            obj = (JSONObject) parser.parse(object.get("response").toString());
 
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
 
         return SignUpByOAuthDto.builder()
-            .id(String.valueOf(object.get("id")))
-            .name((String) nameObj.get("nickname"))
+            .id((String) obj.get("id"))
+            .name((String) obj.get("name"))
             .email((String) obj.get("email"))
             .gender((String) obj.get("gender"))
             .birthday((String) obj.get("birthday"))
+            .phone((String) obj.get("mobile"))
             .role(0).build();
     }
 
@@ -73,4 +73,5 @@ public class KakaoService implements OAuthDetailService {
     public String getUserInfoURI() {
         return attribute.getUserInfoURI();
     }
+
 }

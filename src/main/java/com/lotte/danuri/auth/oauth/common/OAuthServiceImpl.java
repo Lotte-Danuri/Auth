@@ -1,10 +1,11 @@
-package com.lotte.danuri.auth.oauth.kakao;
+package com.lotte.danuri.auth.oauth.common;
 
 import com.lotte.danuri.auth.Auth;
 import com.lotte.danuri.auth.AuthRepository;
 import com.lotte.danuri.auth.client.MemberClient;
 import com.lotte.danuri.auth.dto.TokenDto;
-import com.lotte.danuri.auth.oauth.SignUpByOAuthDto;
+import com.lotte.danuri.auth.oauth.kakao.KakaoService;
+import com.lotte.danuri.auth.oauth.naver.NaverService;
 import com.lotte.danuri.auth.security.TokenProvider;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,67 +21,56 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
 @Transactional
-public class KakaoServiceImpl implements KakaoService{
-
-    private final Environment env;
+public class OAuthServiceImpl implements OAuthService {
     private final AuthRepository authRepository;
     private final MemberClient memberClient;
     private final TokenProvider tokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
     private final CircuitBreakerFactory circuitBreakerFactory;
+    private final OAuthAttributeService oAuthAttributeService;
+    private final KakaoService kakaoService;
+    private final NaverService naverService;
 
-    public KakaoServiceImpl(Environment env, AuthRepository authRepository,
+    public OAuthServiceImpl(AuthRepository authRepository,
         MemberClient memberClient, TokenProvider tokenProvider,
-        BCryptPasswordEncoder passwordEncoder, CircuitBreakerFactory circuitBreakerFactory) {
-        this.env = env;
+        BCryptPasswordEncoder passwordEncoder, CircuitBreakerFactory circuitBreakerFactory,
+        OAuthAttributeService oAuthAttributeService, KakaoService kakaoService,
+        NaverService naverService) {
         this.authRepository = authRepository;
         this.memberClient = memberClient;
         this.tokenProvider = tokenProvider;
         this.passwordEncoder = passwordEncoder;
         this.circuitBreakerFactory = circuitBreakerFactory;
+        this.oAuthAttributeService = oAuthAttributeService;
+        this.kakaoService = kakaoService;
+        this.naverService = naverService;
     }
 
     @Override
-    public String getToken(String code) {
+    public String getToken(String code, String service) {
 
-        final String CLIENT_ID =
-            env.getProperty("spring.security.oauth2.client.registration.kakao.client-id");
-        final String CLIENT_SECRET =
-            env.getProperty("spring.security.oauth2.client.registration.kakao.client-secret");
-        final String GRANT_TYPE = "authorization_code";
-        final String SERVER_URL =
-            env.getProperty("spring.security.oauth2.client.provider.kakao.token-uri");
-        final String REDIRECT_URL =
-            env.getProperty("spring.security.oauth2.client.registration.kakao.redirect-uri");
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", GRANT_TYPE);
-        params.add("client_id", CLIENT_ID);
-        params.add("redirect_uri", REDIRECT_URL);
-        params.add("code", code);
-        params.add("client_secret", CLIENT_SECRET);
+        MultiValueMap<String, String> params = oAuthAttributeService.getParams(code, service);
+        String tokenUri = oAuthAttributeService.getTokenURI(service);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
+        HttpEntity<MultiValueMap<String, String>> request =
             new HttpEntity<>(params, headers);
 
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<String> response = restTemplate.exchange(
-            SERVER_URL, HttpMethod.POST, kakaoTokenRequest, String.class
+            tokenUri, HttpMethod.POST, request, String.class
         );
 
-        log.info("Response from Kakao = {}", response);
+        log.info("Response from OAuth Service [{}] = {}", service, response);
 
         String tokenJson = response.getBody();
         JSONParser parser = new JSONParser();
@@ -89,7 +78,7 @@ public class KakaoServiceImpl implements KakaoService{
         try {
             JSONObject object = (JSONObject) parser.parse(tokenJson);
             accessToken = (String) object.get("access_token");
-            log.info("Access Token from Kakao = {}", accessToken);
+            log.info("Access Token from {} = {}", service, accessToken);
 
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -99,65 +88,39 @@ public class KakaoServiceImpl implements KakaoService{
     }
 
     @Override
-    public SignUpByOAuthDto getUserInfoByKakaoToken(String accessToken) {
+    public SignUpByOAuthDto getUserInfoFromToken(String accessToken, String service) {
 
-        final String USER_INFO_URI =
-            env.getProperty("spring.security.oauth2.client.provider.kakao.user-info-uri");
+        String userInfoUri = oAuthAttributeService.getUserInfoURI(service);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-            USER_INFO_URI,
+            userInfoUri,
             HttpMethod.POST,
-            kakaoUserInfoRequest,
+            request,
             String.class
         );
 
         String body = response.getBody();
         log.info("Response Body = {}", body);
 
-        JSONParser parser = new JSONParser();
-        Long kakaoId = 0L;
-        String name = "";
-        String email = "";
-        String gender = "";
-        String birthday = "";
-
-        try {
-            JSONObject object = (JSONObject) parser.parse(body);
-
-            JSONObject nameObj = (JSONObject) parser.parse(object.get("properties").toString());
-            JSONObject obj = (JSONObject) parser.parse(object.get("kakao_account").toString());
-
-            kakaoId = (Long) object.get("id");
-            name = (String) nameObj.get("nickname");
-            email = (String) obj.get("email");
-            gender = (String) obj.get("gender");
-            birthday = (String) obj.get("birthday");
-
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+        if(service.equals("kakao")) {
+            return kakaoService.getUserInfo(body);
+        }else {
+            return naverService.getUserInfo(body);
         }
 
-        return SignUpByOAuthDto.builder()
-            .kakaoId(kakaoId)
-            .name(name)
-            .email(email)
-            .gender(gender)
-            .birthday(birthday)
-            .role(0).build();
     }
 
     @Override
-    public TokenDto kakaoLogin(SignUpByOAuthDto dto) {
+    public TokenDto oauthLogin(SignUpByOAuthDto dto, String service) {
 
-        final String ADMIN_KEY =
-            env.getProperty("spring.security.oauth2.client.registration.kakao.client-secret");
+        final String secretKey = oAuthAttributeService.getAdminKey(service);
         Optional<Auth> auth = authRepository.findByLoginIdAndDeletedDateIsNull(dto.getEmail());
 
         Long memberId = 0L;
@@ -166,9 +129,9 @@ public class KakaoServiceImpl implements KakaoService{
             log.info("Before Call [getInfoByOAuth] Method IN [Member-Service]");
             CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitBreaker");
             memberId = circuitBreaker.run(() -> memberClient.getInfoByOAuth(dto), throwable -> 0L);
-            log.info("Before Call [getInfoByOAuth] Method IN [Member-Service]");
+            log.info("After Call [getInfoByOAuth] Method IN [Member-Service]");
 
-            String password = dto.getKakaoId() + ADMIN_KEY;
+            String password = dto.getId() + secretKey;
             String encryptedPwd = passwordEncoder.encode(password);
 
             authRepository.save(dto.toEntity(memberId, encryptedPwd));
@@ -177,19 +140,18 @@ public class KakaoServiceImpl implements KakaoService{
             memberId = auth.get().getMemberId();
         }
 
-        String accessToken = tokenProvider.createAccessTokenByOAuth(memberId, "kakao");
+        String accessToken = tokenProvider.createAccessTokenByOAuth(memberId, service);
         String refreshToken = tokenProvider.createRefreshToken();
 
         Auth user = authRepository.findByMemberIdAndDeletedDateIsNull(memberId).orElseThrow();
         user.update(refreshToken);
-        String encodedName = Base64Utils.encodeToString(dto.getName().getBytes());
 
         log.info("accessToken : {}, refreshToken : {}", accessToken, refreshToken);
 
         return TokenDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .encodedName(encodedName)
+            .encodedName(dto.getName())
             .build();
 
     }
