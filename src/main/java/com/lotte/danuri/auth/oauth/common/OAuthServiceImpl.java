@@ -146,12 +146,15 @@ public class OAuthServiceImpl implements OAuthService {
         Auth user = authRepository.findByMemberIdAndDeletedDateIsNull(memberId).orElseThrow();
         user.update(refreshToken);
 
+        String loginId = user.getLoginId().split("@")[0];
+
         log.info("accessToken : {}, refreshToken : {}", accessToken, refreshToken);
 
         return TokenDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .encodedName(dto.getName())
+            .loginId(loginId)
             .build();
 
     }
