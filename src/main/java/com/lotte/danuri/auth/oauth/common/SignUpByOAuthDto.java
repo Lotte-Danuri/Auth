@@ -13,7 +13,6 @@ public class SignUpByOAuthDto {
     private String id;
     private String email;
     private String name;
-    private int role;
 
     private String gender;
 
@@ -27,7 +26,7 @@ public class SignUpByOAuthDto {
         return Auth.builder()
             .loginId(email)
             .encryptedPwd(password)
-            .role(role)
+            .role(0)
             .name(name)
             .memberId(memberId)
             .build();

@@ -155,6 +155,7 @@ public class OAuthServiceImpl implements OAuthService {
             .refreshToken(refreshToken)
             .encodedName(dto.getName())
             .loginId(loginId)
+            .role(user.getRole())
             .build();
 
     }

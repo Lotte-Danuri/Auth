@@ -14,5 +14,6 @@ public class TokenDto {
     private String refreshToken;
     private String encodedName;
     private String loginId;
+    private int role;
 
 }

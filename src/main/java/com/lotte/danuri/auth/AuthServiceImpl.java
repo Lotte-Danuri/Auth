@@ -133,6 +133,7 @@ public class AuthServiceImpl implements AuthService {
             .encryptedPwd(user.getEncryptedPwd())
             .memberId(user.getMemberId())
             .name(user.getName())
+            .role(user.getRole())
             .build();
     }
 

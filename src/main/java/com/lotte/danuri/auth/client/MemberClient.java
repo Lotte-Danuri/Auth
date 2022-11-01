@@ -3,6 +3,7 @@ package com.lotte.danuri.auth.client;
 import com.lotte.danuri.auth.dto.SignUpDto;
 import com.lotte.danuri.auth.oauth.common.SignUpByOAuthDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -15,5 +16,6 @@ public interface MemberClient {
     @PostMapping("/members/oAuth")
     Long getInfoByOAuth(@RequestBody SignUpByOAuthDto dto);
 
-
+    @GetMapping("/seller")
+    Long getSeller(@RequestBody Long memberId);
 }
