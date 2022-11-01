@@ -16,6 +16,6 @@ public interface MemberClient {
     @PostMapping("/members/oAuth")
     Long getInfoByOAuth(@RequestBody SignUpByOAuthDto dto);
 
-    @GetMapping("/seller")
+    @PostMapping("/seller")
     Long getSeller(@RequestBody Long memberId);
 }
