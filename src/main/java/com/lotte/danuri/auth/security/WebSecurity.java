@@ -2,9 +2,11 @@ package com.lotte.danuri.auth.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lotte.danuri.auth.AuthService;
+import com.lotte.danuri.auth.client.MemberClient;
 import com.lotte.danuri.auth.common.exceptions.filter.ExceptionHandlerFilter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
@@ -25,6 +27,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private final AuthService authService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TokenProvider tokenProvider;
+    private final MemberClient memberClient;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -48,7 +52,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private AuthenticationFilter getAuthenticationFilter() throws Exception {
         log.info("Call WebSecurity getAuthenticationFilter");
         AuthenticationFilter authenticationFilter =
-            new AuthenticationFilter(authenticationManager(), authService, env, tokenProvider);
+            new AuthenticationFilter(authenticationManager(), authService, env, tokenProvider, memberClient,
+                circuitBreakerFactory);
 
         return authenticationFilter;
     }

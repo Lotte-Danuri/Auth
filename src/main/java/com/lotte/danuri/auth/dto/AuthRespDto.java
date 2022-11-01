@@ -17,4 +17,6 @@ public class AuthRespDto {
 
     private String name;
 
+    private int role;
+
 }
