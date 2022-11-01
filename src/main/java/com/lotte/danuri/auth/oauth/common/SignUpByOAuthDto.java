@@ -22,6 +22,8 @@ public class SignUpByOAuthDto {
 
     private String phone;
 
+    private int role;
+
     public Auth toEntity(Long memberId, String password) {
         return Auth.builder()
             .loginId(email)
