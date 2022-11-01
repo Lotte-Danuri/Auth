@@ -102,7 +102,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
             log.info("seller storeId = {}", storeId);
 
-            response.addHeader("storeId", String.valueOf(storeId));
+            response.addHeader("store_id", String.valueOf(storeId));
         }
 
         response.addHeader("access_token", accessToken);
