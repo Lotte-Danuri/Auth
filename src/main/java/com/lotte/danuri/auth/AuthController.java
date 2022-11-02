@@ -1,9 +1,11 @@
 package com.lotte.danuri.auth;
 
+import com.lotte.danuri.auth.dto.MemberInfoRespDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
 import com.lotte.danuri.auth.dto.TokenDto;
 import com.lotte.danuri.auth.oauth.common.OAuthService;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -62,6 +65,14 @@ public class AuthController {
             .build());
 
         return new ResponseEntity<>(result, HttpStatus.CREATED);
+    }
+
+    // 쿠폰 적용 위한 회원 이름, 아이디 조회 List API
+    @PostMapping("/info")
+    public ResponseEntity<?> getInfo(@RequestBody String name) {
+        List<MemberInfoRespDto> result = authService.getMembersInfo(name);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

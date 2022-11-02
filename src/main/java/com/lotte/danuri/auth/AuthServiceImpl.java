@@ -8,6 +8,7 @@ import com.lotte.danuri.auth.common.exceptions.exception.DuplicatedIdException;
 import com.lotte.danuri.auth.common.exceptions.exception.InvalidRefreshTokenException;
 import com.lotte.danuri.auth.common.exceptions.exception.WrongLoginInfoException;
 import com.lotte.danuri.auth.dto.AuthRespDto;
+import com.lotte.danuri.auth.dto.MemberInfoRespDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
 import com.lotte.danuri.auth.security.TokenProvider;
 import com.lotte.danuri.auth.dto.TokenDto;
@@ -17,6 +18,8 @@ import io.jsonwebtoken.Jwts;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
@@ -135,6 +138,17 @@ public class AuthServiceImpl implements AuthService {
             .name(user.getName())
             .role(user.getRole())
             .build();
+    }
+
+    @Override
+    public List<MemberInfoRespDto> getMembersInfo(String name) {
+        List<Auth> authList = authRepository.findByNameAndDeletedDateIsNull(name).orElseGet(ArrayList::new);
+
+        return authList.stream().map(auth -> MemberInfoRespDto.builder()
+                                        .name(auth.getName())
+                                        .loginId(auth.getLoginId())
+                                        .build()).collect(Collectors.toList());
+
     }
 
     public boolean validateTokenExceptionExpiration(String token) {
