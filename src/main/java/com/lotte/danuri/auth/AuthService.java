@@ -1,9 +1,11 @@
 package com.lotte.danuri.auth;
 
 import com.lotte.danuri.auth.dto.AuthRespDto;
+import com.lotte.danuri.auth.dto.MemberInfoRespDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
 import com.lotte.danuri.auth.dto.TokenDto;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface AuthService extends UserDetailsService {
@@ -18,4 +20,5 @@ public interface AuthService extends UserDetailsService {
 
     AuthRespDto getUserDetailsById(String loginId);
 
+    List<MemberInfoRespDto> getMembersInfo(String name);
 }
