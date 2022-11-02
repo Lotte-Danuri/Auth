@@ -27,7 +27,7 @@ public class TokenProvider {
     public String createAccessTokenByOAuth(Long memberId, String oauth) {
         return Jwts.builder()
             .setSubject(String.valueOf(memberId))
-            .setSubject(oauth)
+            .setHeaderParam("service", oauth)
             .setExpiration(new Date(System.currentTimeMillis() +
                 Long.parseLong(env.getProperty("token.min_expiration_time"))))
             .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
