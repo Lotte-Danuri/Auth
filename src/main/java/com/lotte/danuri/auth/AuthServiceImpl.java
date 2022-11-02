@@ -8,7 +8,7 @@ import com.lotte.danuri.auth.common.exceptions.exception.DuplicatedIdException;
 import com.lotte.danuri.auth.common.exceptions.exception.InvalidRefreshTokenException;
 import com.lotte.danuri.auth.common.exceptions.exception.WrongLoginInfoException;
 import com.lotte.danuri.auth.dto.AuthRespDto;
-import com.lotte.danuri.auth.dto.MemberInfoRespDto;
+import com.lotte.danuri.auth.dto.MemberInfoDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
 import com.lotte.danuri.auth.security.TokenProvider;
 import com.lotte.danuri.auth.dto.TokenDto;
@@ -141,10 +141,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public List<MemberInfoRespDto> getMembersInfo(String name) {
+    public List<MemberInfoDto> getMembersInfo(String name) {
         List<Auth> authList = authRepository.findByNameAndDeletedDateIsNull(name).orElseGet(ArrayList::new);
 
-        return authList.stream().map(auth -> MemberInfoRespDto.builder()
+        return authList.stream().map(auth -> MemberInfoDto.builder()
+                                        .id(auth.getId())
                                         .name(auth.getName())
                                         .loginId(auth.getLoginId())
                                         .build()).collect(Collectors.toList());

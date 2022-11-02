@@ -1,6 +1,6 @@
 package com.lotte.danuri.auth;
 
-import com.lotte.danuri.auth.dto.MemberInfoRespDto;
+import com.lotte.danuri.auth.dto.MemberInfoDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
 import com.lotte.danuri.auth.dto.TokenDto;
 import com.lotte.danuri.auth.oauth.common.OAuthService;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -69,8 +68,9 @@ public class AuthController {
 
     // 쿠폰 적용 위한 회원 이름, 아이디 조회 List API
     @PostMapping("/info")
-    public ResponseEntity<?> getInfo(@RequestBody String name) {
-        List<MemberInfoRespDto> result = authService.getMembersInfo(name);
+    public ResponseEntity<?> getInfo(@RequestBody MemberInfoDto dto) {
+        log.info("name = {}", dto.getName());
+        List<MemberInfoDto> result = authService.getMembersInfo(dto.getName());
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

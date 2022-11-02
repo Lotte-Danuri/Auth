@@ -3,7 +3,7 @@ package com.lotte.danuri.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.lotte.danuri.auth.common.exceptions.exception.DuplicatedIdException;
-import com.lotte.danuri.auth.dto.MemberInfoRespDto;
+import com.lotte.danuri.auth.dto.MemberInfoDto;
 import com.lotte.danuri.auth.dto.SignUpDto;
 import java.util.List;
 import org.assertj.core.api.Assertions;
@@ -51,7 +51,7 @@ public class AuthServiceTest {
 
         String name = "안채영";
 
-        List<MemberInfoRespDto> result = authService.getMembersInfo(name);
+        List<MemberInfoDto> result = authService.getMembersInfo(name);
         result.forEach(m -> System.out.println(m.getName() + " " + m.getLoginId()));
 
         assertThat(result.size()).isGreaterThanOrEqualTo(0);

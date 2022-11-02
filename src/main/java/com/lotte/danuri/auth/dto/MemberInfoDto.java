@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MemberInfoRespDto {
+public class MemberInfoDto {
 
     private Long id;
     private String name;
