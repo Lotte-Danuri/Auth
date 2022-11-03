@@ -79,6 +79,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String userName = ((User)authResult.getPrincipal()).getUsername();
         log.info("username = {}", userName);
         AuthRespDto userDetails = authService.getUserDetailsById(userName);
+        log.info("name = {}", userDetails.getName());
         String encodedName = Base64Utils.encodeToString(userDetails.getName().getBytes());
 
         log.info("encodedName : {}", encodedName);
@@ -107,7 +108,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         response.addHeader("access_token", accessToken);
         response.addHeader("refresh_token", refreshToken);
-        response.addHeader("loginId", userDetails.getId());
+        response.addHeader("login_id", userDetails.getId());
         response.addHeader("role", String.valueOf(userDetails.getRole()));
         response.addHeader("name", encodedName);
 
