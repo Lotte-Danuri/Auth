@@ -142,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public List<MemberInfoDto> getMembersInfo(String name) {
-        List<Auth> authList = authRepository.findByNameAndDeletedDateIsNull(name).orElseGet(ArrayList::new);
+        List<Auth> authList = authRepository.findByNameAndRoleAndDeletedDateIsNull(name, 0).orElseGet(ArrayList::new);
 
         return authList.stream().map(auth -> MemberInfoDto.builder()
                                         .id(auth.getId())
