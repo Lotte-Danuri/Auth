@@ -21,4 +21,6 @@ public interface AuthService extends UserDetailsService {
     AuthRespDto getUserDetailsById(String loginId);
 
     List<MemberInfoDto> getMembersInfo(String name);
+
+    List<MemberInfoDto> getMembersByRole(int role);
 }
