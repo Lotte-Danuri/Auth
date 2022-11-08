@@ -13,4 +13,5 @@ public interface AuthRepository extends JpaRepository<Auth, Long> {
     Optional<Auth> findByMemberIdAndDeletedDateIsNull(Long memberId);
 
     Optional<List<Auth>> findByNameAndRoleAndDeletedDateIsNull(String name, int role);
+    Optional<List<Auth>> findByRoleAndDeletedDateIsNull(int role);
 }

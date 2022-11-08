@@ -152,6 +152,18 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public List<MemberInfoDto> getMembersByRole(int role) {
+        List<Auth> result = authRepository.findByRoleAndDeletedDateIsNull(role)
+            .orElseGet(ArrayList::new);
+
+        return result.stream().map(auth -> MemberInfoDto.builder()
+            .id(auth.getId())
+            .name(auth.getName())
+            .loginId(auth.getLoginId())
+            .build()).collect(Collectors.toList());
+    }
+
     public boolean validateTokenExceptionExpiration(String token) {
 
         // 로그아웃 확인 필요
