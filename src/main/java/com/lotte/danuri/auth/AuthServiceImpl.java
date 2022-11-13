@@ -158,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
             .orElseGet(ArrayList::new);
 
         return result.stream().map(auth -> MemberInfoDto.builder()
-            .id(auth.getId())
+            .id(auth.getMemberId())
             .name(auth.getName())
             .loginId(auth.getLoginId())
             .build()).collect(Collectors.toList());
